@@ -1,270 +1,225 @@
-# Análise de prêmios e sinistros — SUSEP/SES
+# Seguro SUSEP
 
-Projeto de análise de dados com a base pública do **SES (Sistema de Estatísticas da SUSEP)**, focado em três ramos de seguro: **Automóvel – Casco (0531)**, **Vida (1391)** e **Compreensivo Residencial (0114)**.
+Projeto de análise de dados reais de seguros no Brasil, feito em MariaDB/SQL, com a base pública do SES (Sistema de Estatísticas da SUSEP).
 
-> **Uso de IA:** usei Claude e ChatGPT como apoio no tratamento dos dados,
-> conferindo as informações na fonte. Detalhes na seção 12.
+Montei o banco a partir dos arquivos da SUSEP, conferi se os dados fazem sentido e respondi perguntas que um gestor do setor poderia ter sobre três ramos: **Automóvel – Casco**, **Vida** e **Compreensivo Residencial**.
 
-O foco desta primeira etapa é a **análise exploratória e a validação da base**: entender o que cada coluna significa, conferir a qualidade dos dados, documentar o que é fato e o que é hipótese, e só então montar o banco de dados (MariaDB) para as análises em SQL.
+## Sobre os dados e o período
 
-## Resumo
+- Fonte: base completa do SES, tabela de prêmios e sinistros por empresa, ramo, mês e estado (UF).
+- Período: janeiro de 2023 a julho de 2026. **2026 tem só sete meses**, então quando comparo anos uso o mesmo período (janeiro a julho) em todos.
+- 109.142 registros, 27 estados, 769 empresas no cadastro.
+- Os valores estão em reais correntes, **sem correção pela inflação**.
+- Conferência: o prêmio direto de Automóvel em 2024 no meu banco (R$ 35.633.163.776) bate com o portal da SUSEP (R$ 35.633.145.412).
 
-- Base real da SUSEP, recorte de 109.142 linhas (jan/2023 a jul/2026), importado no MariaDB.
-- Conferi o prêmio direto do Automóvel em 2024 contra o portal oficial da SUSEP: diferença de 0,00005%.
-- Encontrei dados estranhos da Allianz em Automóvel (jan–ago/2023), marquei as linhas em vez de apagar e expliquei a regra de uso.
-- Em 2024, o Rio Grande do Sul teve sinistros muito acima do normal em maio e junho (enchentes).
-- A razão sinistro ÷ prêmio que calculei não é a sinistralidade oficial (0,71 contra 0,61 no Automóvel em 2024). Serve só para comparar anos.
+## Banco de dados
 
----
+Banco `susep_seguros`, com três tabelas: `uf2` (prêmios e sinistros), `ramos` e `empresas`.
 
-## 1. Fonte dos dados
+Os detalhes das tabelas e como recriar o banco estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em `analise_susep.sql`.
 
-| Item | Detalhe |
-|---|---|
-| Origem | Base completa do SES, baixada do site da SUSEP (`BaseCompleta.zip`) |
-| Tabela usada | `SES_UF2.csv` — "Seguros: Prêmios e Sinistros (UF)" |
-| Documentação | `Documentacao_das_tabelas.rtf` (fornecida no mesmo pacote) |
-| Validação externa | Portal de consulta do SES (`www2.susep.gov.br/menuestatistica/SES/premiosesinistros.aspx?id=54`) |
-| Formato | CSV, separador `;`, decimal com vírgula, codificação Latin-1 |
+## Como ler os resultados
 
----
+- **Prêmio direto:** o que as seguradoras arrecadam dos clientes.
+- **Sinistro direto:** o que aparece como sinistro.
+- **Razão sinistro/prêmio:** sinistro ÷ prêmio × 100. Se a razão é 70, para cada R$ 100 de prêmio apareceram R$ 70 de sinistro.
 
-## 2. Escopo do recorte
-
-| Item | Valor |
-|---|---|
-| Ramos | 0531 (Automóvel – Casco), 1391 (Vida), 0114 (Compreensivo Residencial) |
-| Período | 01/2023 a 07/2026 (43 meses) |
-| Combinações mês/ramo | 129 (nenhum mês faltante) |
-| Registros | 109.142 |
-| UFs | 27 (em todos os três ramos) |
-| Empresas no período | 56 (Automóvel), 61 (Residencial), 65 (Vida) |
-| Granularidade | 1 registro = 1 empresa + 1 mês + 1 ramo + 1 UF (sem duplicidades) |
-
-**Atenção:** 2026 cobre apenas jan–jul. Para comparar com anos completos, use a janela jan–jul de cada ano ou razões (e não totais em reais).
+Essa razão é uma aproximação. **Não é a sinistralidade oficial da SUSEP**, que usa outros conceitos (para Automóvel em 2024, o portal mostra 61% e a minha razão dá 71%). Por isso uso a razão para comparar períodos dentro do mesmo ramo, não para dizer qual é a sinistralidade do mercado.
 
 ---
 
-## 3. Dicionário de dados (SES_UF2)
+## BLOCO A: onde está o dinheiro?
 
-| Coluna | Descrição (documentação oficial) | Situação no projeto |
-|---|---|---|
-| `coenti` | Código da empresa | Usada (`empresa`) |
-| `damesano` | Ano/mês (AAAAMM) | Usada (`ano_mes`) |
-| `ramos` | Código do ramo | Usada (`ramo`) |
-| `UF` | Unidade da Federação | Usada (`uf`) |
-| `premio_dir` | Prêmios Diretos | Usada |
-| `premio_ret` | Prêmios Retidos | Usada |
-| `sin_dir` | Sinistros Diretos | Usada |
-| `prem_ret_liq` | "Prêmios Retidos" | **Descartada**: duplicata de `premio_ret` |
-| `gracodigo` | Código do grupamento de ramos | Usada (`grupamento`) |
-| `salvados` | Salvados de sinistros | **Descartada**: zero em todas as linhas do recorte |
-| `recuperacao` | Recuperações | **Descartada**: zero em todas as linhas do recorte |
+### Pergunta 1: quanto cada ramo arrecada e paga em sinistros, ano a ano?
 
-Códigos de ramo confirmados em `Ses_ramos.csv`: 0114 = Compreensivo Residencial, 0531 = Automóvel – Casco, 1391 = Vida.
+Valores em R$ bilhões.
 
----
-
-## 4. Validações realizadas
-
-| Validação | Resultado |
-|---|---|
-| Cobertura temporal dos 3 ramos | Sem mês faltante (129 combinações) |
-| Duplicidade em empresa + mês + ramo + UF | Nenhuma |
-| Cabeçalho real do arquivo vs. ordem assumida | Confere (11 colunas) |
-| `prem_ret_liq` vs. `premio_ret` | Iguais em 100% das 76.186 linhas com prêmio retido ≠ 0; somas idênticas |
-| `salvados` e `recuperacao` | Zero nas 109.142 linhas |
-| Leitura direta do zip vs. recorte filtrado | Mesmas linhas e valores (o filtro não altera dados) |
-| **Prêmio direto 0531 em 2024 vs. portal da SUSEP** | Portal: R$ 35.633.145.412. Base: R$ 35.633.163.776,11. Diferença ≈ R$ 18 mil (≈ 0,00005%) |
-| Importação no MariaDB vs. arquivo | 109.142 linhas; prêmio 0531/2024 idêntico; soma de `sin_dir` difere em R$ 0,05 sobre R$ 98,6 bi (arredondamento) |
-
-A diferença de ≈ R$ 18 mil contra o portal **não teve a causa investigada**.
-
----
-
-## 5. Achados e decisões
-
-### 5.1 `sin_dir` negativo é esperado
-Existem valores negativos de `sin_dir` na própria fonte (não criados pelo tratamento). Foram **mantidos**. Nas consultas, use sempre o valor líquido (`SUM`), nunca só positivos ou só negativos.
-
-### 5.2 Anomalia de dados: Allianz (05177), Automóvel, jan–ago/2023
-- Em vários estados, o `sin_dir` tem valores positivos e negativos de ordem de bilhões, incompatíveis com o prêmio de cada UF. Exemplo (mar/2023): MT com sinistro de R$ 5,32 bi para prêmio de R$ 12 mi; SE com −R$ 4,16 bi para prêmio de R$ 2,6 mi.
-- Os valores estão na fonte (conferido direto no zip).
-- O **total nacional** da empresa parece coerente (razão sinistro/prêmio entre 0,68 e 1,09 nos 12 meses de 2023) e o prêmio é estável. O problema parece restrito à **distribuição por UF**.
-- De set–dez/2023 e em 2024–2026 não há sinistros negativos da empresa em Automóvel.
-- **Causa não determinada** (possíveis: erro de envio, reclassificação ou regra de alocação por UF).
-- **Tratamento:** linhas mantidas e sinalizadas em `flag_anomalia_uf = 1` (Allianz, ramo 0531, 202301 a 202308, todas as 27 UFs = 216 linhas). A janela foi definida de forma conservadora, a partir da presença de UFs negativas ou com sinistro acima de 5× o prêmio em todos esses meses.
-- **Regra de uso:** análises nacionais podem usar todas as linhas. Análises **por UF em Automóvel** devem filtrar `flag_anomalia_uf = 0` (nesse caso, os valores em reais de 2023 ficam subestimados; as razões continuam comparáveis).
-
-### 5.3 Evento real: Rio Grande do Sul, maio e junho de 2024
-- Razão sinistro/prêmio do RS em Automóvel Casco: 0,61 (2023), **1,10 (2024)**, 0,76 (2025).
-- Em 2024 o desvio se concentra em **maio (5,17)** e **junho (1,30)**. Nos demais meses a razão fica entre 0,62 e 0,79.
-- A SUSEP publicou (nota de 05/07/2024) que a sinistralidade dos seguros de **danos** no país saltou de 42,1% para 66,1% de abril a maio, com os sinistros diretos de danos no RS subindo 192,5% no mês.
-- Os valores foram **mantidos** por refletirem um evento real. A nota da SUSEP trata de danos como um todo; a coincidência com o ramo 0531 é observada nos dados deste projeto.
-
----
-
-## 6. Resultados preliminares (base validada)
-
-Razão = `sin_dir` ÷ `premio_dir` (ver limitações).
-
-| Ramo | Ano | Prêmio direto (R$ bi) | Sinistro direto (R$ bi) | Razão |
+| Ramo | Ano | Prêmio direto | Sinistro direto | Razão |
 |---|---|---|---|---|
-| 0114 | 2023 | 5,15 | 1,22 | 0,24 |
-| 0114 | 2024 | 6,00 | 1,23 | 0,20 |
-| 0114 | 2025 | 6,67 | 1,32 | 0,20 |
-| 0114 | 2026 (jan–jul) | 4,02 | 0,74 | 0,18 |
-| 0531 | 2023 | 36,72 | 22,86 | 0,62 |
-| 0531 | 2024 | 35,63 | 25,30 | 0,71 |
-| 0531 | 2025 | 37,49 | 26,01 | 0,69 |
-| 0531 | 2026 (jan–jul) | 21,75 | 16,16 | 0,74 |
-| 1391 | 2023 | 14,71 | 0,93 | 0,06 |
-| 1391 | 2024 | 17,86 | 1,06 | 0,06 |
-| 1391 | 2025 | 20,37 | 1,09 | 0,05 |
-| 1391 | 2026 (jan–jul) | 12,65 | 0,69 | 0,05 |
+| Auto | 2023 | 36,72 | 22,86 | 62,24% |
+| Auto | 2024 | 35,63 | 25,30 | 70,99% |
+| Auto | 2025 | 37,49 | 26,01 | 69,38% |
+| Auto | 2026 (jan–jul) | 21,75 | 16,16 | 74,31% |
+| Resid | 2023 | 5,15 | 1,22 | 23,73% |
+| Resid | 2024 | 6,00 | 1,23 | 20,45% |
+| Resid | 2025 | 6,67 | 1,32 | 19,85% |
+| Resid | 2026 (jan–jul) | 4,02 | 0,74 | 18,48% |
+| Vida | 2023 | 14,71 | 0,93 | 6,29% |
+| Vida | 2024 | 17,86 | 1,06 | 5,93% |
+| Vida | 2025 | 20,37 | 1,09 | 5,33% |
+| Vida | 2026 (jan–jul) | 12,65 | 0,69 | 5,47% |
+
+**O que mostra:**
+- Automóvel é o maior ramo em prêmio. O prêmio caiu em 2024 e subiu em 2025. A razão subiu de 62% (2023) para 74% (2026), ou seja, o sinistro pesa cada vez mais em relação ao que entra.
+- Residencial: o prêmio cresceu e a razão caiu, de 24% para 18%.
+- Vida: o prêmio cresceu, mas o ritmo diminuiu de 2024 para 2025. A razão fica perto de 5% a 6%.
+
+**Cuidado:** a razão de Vida é muito baixa e não sei dizer o que o sinistro direto captura nesse ramo. Por isso comparo cada ramo com ele mesmo ao longo do tempo, e não os ramos entre si.
+
+### Pergunta 2: como a razão evoluiu mês a mês, e em quais meses foi mais crítica?
+
+Os 3 meses com a razão mais alta de cada ramo:
+
+| Ramo | 1º | 2º | 3º |
+|---|---|---|---|
+| Auto | 05/2024 (96,16%) | 01/2025 (79,19%) | 01/2026 (79,04%) |
+| Resid | 11/2023 (33,98%) | 10/2023 (33,46%) | 01/2024 (31,87%) |
+| Vida | 03/2023 (8,29%) | 05/2023 (7,71%) | 07/2024 (7,46%) |
+
+**O que mostra:** o pior mês de Automóvel, maio de 2024, destoa dos vizinhos (entre 66% e 72%). Esse mês coincide com as enchentes no Rio Grande do Sul (veja a pergunta 7). Os outros meses mais altos de Automóvel são janeiros.
+
+**Cuidado:** a razão de um mês isolado oscila mais que a anual, e três anos de dados são poucos para falar em "época do ano" com segurança.
+
+### Pergunta 3: quais são as maiores empresas de cada ramo?
+
+As três maiores por prêmio direto no período (jan/2023 a jul/2026):
+
+| Ramo | Código da empresa | Prêmio (R$ bi) | % do ramo |
+|---|---|---|---|
+| Auto | 05886 | 31,22 | 23,7% |
+| Auto | 06190 | 20,58 | 15,6% |
+| Auto | 05312 | 17,74 | 13,5% |
+| Resid | 05886 | 4,33 | 19,8% |
+| Resid | 05312 | 3,44 | 15,7% |
+| Resid | 03476 | 3,32 | 15,2% |
+| Vida | 06866 | 28,53 | 43,5% |
+| Vida | 04367 | 9,76 | 14,9% |
+| Vida | 05282 | 7,89 | 12,0% |
+
+**O que mostra:** em Vida, a líder tem quase metade do ramo, e a segunda tem um terço do tamanho dela. A empresa 05886 lidera Automóvel e Residencial e aparece em 7º lugar em Vida.
+
+A consulta completa traz as 10 maiores de cada ramo. Os nomes das empresas vêm da tabela `empresas` (cadastro da SUSEP), e aqui mostro os códigos.
+
+### Pergunta 4: quantas empresas somam 80% do prêmio de cada ramo?
+
+| Ramo | Empresas no ramo | Empresas que somam 80% |
+|---|---|---|
+| Vida | 65 | 5 |
+| Automóvel | 56 | 7 |
+| Residencial | 61 | 8 |
+
+**O que mostra:** nos três ramos, menos de 15% das empresas concentram 80% do prêmio. Vida é o mais concentrado.
+
+**Cuidado:** "empresa" aqui é cada entidade que envia dados à SUSEP. Não juntei empresas do mesmo grupo econômico, o que deixaria o mercado ainda mais concentrado.
 
 ---
 
-## 7. Limitações e pontos em aberto
+## BLOCO B: para onde o mercado cresce?
 
-1. **A razão usada é uma proxy, não a sinistralidade oficial.** O portal da SUSEP calcula a sinistralidade como sinistro ocorrido ÷ prêmio ganho. Para o ramo 0531 em 2024, o portal mostra sinistralidade de **0,61**, contra **0,71** da proxy deste projeto. A diferença vem do conceito: `sin_dir` não é o sinistro ocorrido, e o denominador é prêmio direto, não prêmio ganho. Use a proxy para **comparar anos dentro do mesmo ramo**, não para afirmar a sinistralidade do mercado.
-2. **Comparação entre ramos:** as razões de Vida (5–6%) e Residencial não são comparáveis às de Automóvel como medida de desempenho; o ramo 1391 tem composição própria.
-3. **`sin_dir`:** a documentação diz apenas "Sinistros Diretos". Não foi confirmado se é pago, avisado ou ocorrido. A coluna `salvados` é zero nesta tabela, então `sin_dir` **não está líquido de salvados e ressarcimentos** nesta base.
-4. **Sinistro retido não existe nesta tabela.** (`prem_ret_liq` é cópia de prêmio retido.)
-5. **Nível baixo de 2023 em Automóvel (razão 0,62)** persiste mesmo sem a Allianz (0,60) e não foi explicado.
-6. **Importação no MariaDB:** 5.608 avisos de truncamento de casas decimais (`DECIMAL(18,2)`), com impacto de R$ 0,05 sobre R$ 98,6 bi no total de `sin_dir`.
-7. **Recorte estatístico:** o detector de anomalias usado (sinistro acima de R$ 50 mi e acima de 20× o prêmio da UF) só capturou distorções grandes. Distorções menores não foram testadas.
+### Pergunta 5: o prêmio de cada ramo está crescendo de um ano para o outro?
 
----
+Comparação de **janeiro a julho** em todos os anos, porque 2026 só tem esses meses.
 
-## 8. Como reproduzir
+| Ramo | 2023 | 2024 | 2025 | 2026 |
+|---|---|---|---|---|
+| Auto (R$ bi) | 21,31 | 20,26 | 21,17 | 21,75 |
+| variação | – | −4,92% | +4,50% | +2,73% |
+| Resid (R$ bi) | 2,77 | 3,46 | 3,73 | 4,02 |
+| variação | – | +25,10% | +7,78% | +7,76% |
+| Vida (R$ bi) | 7,91 | 9,93 | 11,21 | 12,65 |
+| variação | – | +25,56% | +12,88% | +12,84% |
 
-### 8.1 Gerar o recorte (terminal)
-```bash
-unzip -p BaseCompleta.zip SES_UF2.csv | awk -F';' \
-  'NR==1 || (($3=="0531"||$3=="1391"||$3=="0114") && $2>=202301)' > recorte_uf2.csv
-# esperado: 109143 linhas (com cabeçalho)
-```
+**O que mostra:**
+- Automóvel ficou praticamente estável: cerca de +2% de 2023 a 2026, com queda em 2024.
+- Residencial cresceu cerca de 45% no período e Vida cerca de 60%. Nos dois, o ritmo desacelerou depois de 2024.
 
-### 8.2 Gerar o arquivo limpo para o banco
-Converte vírgula decimal em ponto, remove colunas sem informação e cria a flag:
-```bash
-awk -F';' 'BEGIN{OFS=";"; print "empresa","ano_mes","ramo","uf","premio_dir","premio_ret","sin_dir","grupamento","flag_anomalia_uf"}
-NR>1 { p=$5; r=$6; s=$7; gsub(",",".",p); gsub(",",".",r); gsub(",",".",s);
-       f=($1=="05177" && $3=="0531" && $2>=202301 && $2<=202308)?1:0;
-       print $1,$2,$3,$4,p,r,s,$9,f }' recorte_uf2.csv > uf2_limpo.csv
-# esperado: 109143 linhas; 216 linhas com flag = 1
-```
-
-### 8.3 Criar o banco e a tabela (DDL)
-```sql
-CREATE DATABASE susep_seguros CHARACTER SET utf8mb4;
-USE susep_seguros;
-
-CREATE TABLE uf2 (
-  empresa          CHAR(5)       NOT NULL,
-  ano_mes          CHAR(6)       NOT NULL,
-  ramo             CHAR(4)       NOT NULL,
-  uf               CHAR(2)       NOT NULL,
-  premio_dir       DECIMAL(18,2) NOT NULL,
-  premio_ret       DECIMAL(18,2) NOT NULL,
-  sin_dir          DECIMAL(18,2) NOT NULL,
-  grupamento       CHAR(2),
-  flag_anomalia_uf TINYINT       NOT NULL DEFAULT 0,
-  PRIMARY KEY (empresa, ano_mes, ramo, uf)
-);
-```
-
-### 8.4 Importar (DML)
-Abra o cliente com `mariadb -u root -p --local-infile=1`, na pasta do arquivo:
-```sql
-LOAD DATA LOCAL INFILE 'uf2_limpo.csv'
-INTO TABLE uf2
-FIELDS TERMINATED BY ';'
-LINES TERMINATED BY '\n'
-IGNORE 1 LINES;
-```
-
-### 8.5 Conferências pós-importação
-```sql
-SELECT COUNT(*) FROM uf2;                                  -- 109142
-SELECT SUM(premio_dir) FROM uf2
- WHERE ramo='0531' AND ano_mes LIKE '2024%';               -- 35633163776.11
-SELECT SUM(flag_anomalia_uf) FROM uf2;                     -- 216
-```
+**Cuidado:** os valores são nominais. Com a inflação descontada, o crescimento real é menor, e Automóvel provavelmente não cresceu em termos reais. Não consigo explicar com os dados a queda de Automóvel em 2024.
 
 ---
 
-## 9. Consultas de referência
+## BLOCO C: onde está o risco?
 
-Série anual por ramo (todas as UFs):
-```sql
-SELECT ramo,
-       SUBSTRING(ano_mes,1,4)                 AS ano,
-       ROUND(SUM(premio_dir)/1e9, 2)          AS premio_bi,
-       ROUND(SUM(sin_dir)/1e9, 2)             AS sinistro_bi,
-       ROUND(SUM(sin_dir)/SUM(premio_dir), 2) AS razao_sin_prem
-FROM uf2
-GROUP BY ramo, SUBSTRING(ano_mes,1,4)
-ORDER BY ramo, ano;
-```
+### Pergunta 6: em Automóvel, quais estados têm a razão mais alta, e eles pesam em volume?
 
-Razão por UF em Automóvel, **excluindo a anomalia**:
-```sql
-SELECT uf, ROUND(SUM(sin_dir)/SUM(premio_dir), 2) AS razao
-FROM uf2
-WHERE ramo='0531' AND flag_anomalia_uf = 0
-GROUP BY uf
-ORDER BY razao DESC;
-```
+Sem as linhas sinalizadas da Allianz de 2023 (veja a pergunta 9).
 
-Mês a mês do RS em 2024 (evento das enchentes):
-```sql
-SELECT ano_mes,
-       ROUND(SUM(premio_dir)/1e6, 1)          AS premio_mi,
-       ROUND(SUM(sin_dir)/1e6, 1)             AS sinistro_mi,
-       ROUND(SUM(sin_dir)/SUM(premio_dir), 2) AS razao
-FROM uf2
-WHERE ramo='0531' AND uf='RS' AND flag_anomalia_uf = 0
-  AND ano_mes BETWEEN '202401' AND '202412'
-GROUP BY ano_mes
-ORDER BY ano_mes;
-```
+| Estado | Razão | Peso no prêmio de Auto |
+|---|---|---|
+| AP | 84,82% | 0,03% |
+| RS | 81,75% | 6,40% |
+| TO | 79,26% | 0,33% |
+| RO | 78,56% | 0,32% |
+| PI | 77,51% | 0,28% |
+| SP | 64,79% | 42,42% |
+| RN (menor) | 56,54% | 0,71% |
 
----
+**O que mostra:** os estados do topo (AP, TO, RO, PI) pesam menos de 0,4% do prêmio cada. Com pouco volume, um único sinistro grande muda bastante a razão. O RS é a exceção: razão alta e peso de 6,4%. SP, MG, PR, RJ e RS somam cerca de 72% do prêmio.
 
-## 10. Próximos passos
+**Cuidado:** a razão do RS inclui maio e junho de 2024 (veja a pergunta 7). Também não sei como a SUSEP atribui cada valor a um estado, então não dá para dizer que os motoristas de um estado "custam mais".
 
-- [ ] Série mensal por ramo, com o evento do RS em 2024 destacado
-- [ ] Concentração de mercado: quantas empresas somam 80% do prêmio de cada ramo
-- [ ] Comparação entre UFs, com o volume de prêmio ao lado (UFs pequenas oscilam mais)
-- [ ] Gráficos (Python) a partir das consultas SQL
-- [ ] Investigar a diferença de ≈ R$ 18 mil contra o portal (opcional)
-- [ ] Segunda conferência externa (Vida e Residencial em 2024 no portal)
+### Pergunta 7: o pior resultado de um estado é tendência ou evento pontual?
+
+Razão sinistro/prêmio de Automóvel por ano, sem as linhas sinalizadas:
+
+| Estado | 2023 | 2024 | 2025 | 2026 (jan–jul) |
+|---|---|---|---|---|
+| AP (pior razão) | 58,61% | 83,28% | 96,17% | 95,49% |
+| RS | 61% | 110% | 76% | 78% |
+| SP | 63% | 63% | 65% | 71% |
+
+Mês a mês, o RS em 2024: maio foi 517% e junho 130%, enquanto os outros meses ficaram entre 62% e 79%.
+
+**O que mostra:**
+- **RS:** sobe em 2024 e volta em 2025. O desenho é de **evento pontual**. A SUSEP publicou em julho de 2024 que a sinistralidade dos seguros de danos no país saltou de 42,1% em abril para 66,1% em maio, por causa da tragédia no sul ([nota da SUSEP](https://www.gov.br/susep/pt-br/central-de-conteudos/noticias/2024/julho/reflexo-da-tragedia-no-sul-sinistralidade-nos-seguros-de-danos-salta-em-maio-para-66-1)). Os dados do projeto mostram o pico, e a explicação vem dessa fonte externa.
+- **AP:** sobe por três anos e fica alto, o desenho de **tendência**. Mas o prêmio é de só R$ 7 a 12 milhões por ano, então poucos sinistros grandes mudam o número. Trato como indício.
+- **SP:** quase estável.
 
 ---
 
-## 11. Ferramentas
+## BLOCO D: dá para confiar nos números?
 
-MariaDB 11.8, `awk` e `unzip` (exploração inicial, sem descompactar a base de ~2,8 GB), SQL para as análises.
+### Pergunta 8: em 2023, o resultado extremo de Sergipe está concentrado em poucos meses?
+
+| Mês de 2023 | Prêmio (R$ mi) | Sinistro (R$ mi) | Razão |
+|---|---|---|---|
+| Março | 18,2 | **−4.153,7** | −22.875% |
+| Os outros 11 meses | 15 a 18 | 5 a 12 | 29% a 68% |
+
+**O que mostra:** o valor extremo está num mês só, março. Os outros meses têm valores normais. Um sinistro negativo de R$ 4,15 bilhões para um prêmio mensal de R$ 18 milhões é impossível para um estado.
+
+### Pergunta 9: os números por estado são confiáveis?
+
+> *Nota: esta pergunta foi construída com apoio de IA. A estratégia de comparar o total nacional da empresa com o pior estado foi sugerida, e eu executei as consultas. Ainda estou estudando os detalhes das funções usadas.*
+
+**O que encontrei:**
+- Procurei linhas em que o sinistro passa de R$ 50 milhões e de 20 vezes o prêmio daquele estado. Em toda a base, só uma combinação apareceu: **Allianz (05177), Automóvel, 2023**, com 20 linhas.
+- Exemplo (março de 2023): Mato Grosso com sinistro de +R$ 5,32 bi para prêmio de R$ 12 mi, e Sergipe com −R$ 4,16 bi para prêmio de R$ 2,6 mi. Os valores estão assim na fonte da SUSEP, conferi no arquivo original.
+- O **total nacional** da empresa parece coerente: razão entre 68% e 109% nos 12 meses de 2023. O problema parece estar na distribuição por estado.
+- De janeiro a agosto de 2023 a empresa tem sinistros negativos em vários estados. De setembro a dezembro de 2023, e em 2024 a 2026, não.
+
+**O que fiz:** mantive as linhas e marquei com `flag_anomalia_uf = 1` (Allianz, Automóvel, janeiro a agosto de 2023: 216 linhas). Nas análises por estado de Automóvel (perguntas 6, 7), excluo essas linhas. Nas análises nacionais, uso tudo, porque o total parece certo.
+
+**O que não sei:** a causa. Pode ser erro de envio, reclassificação ou uma regra de alocação por estado que eu desconheço.
+
+**Limite:** o teste só pega distorções grandes. Erros menores podem ter passado.
 
 ---
 
-## 12. Como este projeto foi feito
+## Limitações
 
-Usei IA (Claude e ChatGPT) como apoio, principalmente pela praticidade no
-tratamento e na limpeza dos dados. Não tratei as respostas como verdade:
-sempre que possível, fui conferir na fonte.
+- A razão sinistro/prêmio não é a sinistralidade oficial (explicado acima).
+- A tabela não tem sinistro retido. A coluna `prem_ret_liq` é cópia de prêmio retido, então descartei. `salvados` e `recuperacao` são zero em todo o período e também foram descartadas.
+- Não sei se `sin_dir` é sinistro pago, avisado ou ocorrido: a documentação diz só "Sinistros Diretos".
+- A base é agregada por empresa, ramo e estado. Não tem clientes nem apólices individuais.
+- O prêmio de Automóvel em 2024 no meu banco difere do portal em cerca de R$ 18 mil (0,00005%). Não investiguei a causa.
+- Por causa da anomalia da Allianz, os valores em reais de Automóvel por estado em 2023 ficam subestimados quando excluo as linhas sinalizadas (as razões continuam comparáveis).
 
-O que conferi por conta própria:
+## SQL utilizado
 
-- **Dicionário de dados:** comparei o que a IA me passou com a documentação
-  da SUSEP e com o arquivo. Isso mostrou que `prem_ret_liq` era cópia de
-  `premio_ret`, e descartei a coluna.
-- **Valores da Allianz:** verifiquei direto no arquivo original para saber se
-  o problema estava na fonte ou no meu tratamento.
-- **Prêmio do Automóvel em 2024:** comparei com o portal oficial da SUSEP.
-- **Enchentes no RS:** confirmei que o pico de sinistros em maio e junho de
-  2024 coincide com a nota publicada pela SUSEP.
+- `INNER JOIN` e `CROSS JOIN`
+- `GROUP BY`, `SUM`, `ROUND`, `MAX`
+- `CASE WHEN`
+- `LEFT` e `RIGHT` para separar ano e mês
+- `NULLIF`
+- CTEs (`WITH`)
+- Funções de janela: `ROW_NUMBER`, `SUM() OVER`, `LAG`
 
-Rodei todos os comandos e consultas no meu computador e conferi as saídas.
+## Sobre o uso de IA
+
+Usei IA (ChatGPT e Claude) como guia: para entender a estrutura dos arquivos da SUSEP, conferir os dados e discutir como interpretar os resultados. As consultas foram escritas por mim, com correções apontadas na revisão. A investigação de qualidade dos dados (dicionário de colunas, anomalia da Allianz) foi feita com orientação de IA, e conferi os números contra o portal da SUSEP.
+
+## Como recriar o banco
+
+1. Rodar `dll_s.sql` (cria o banco e as tabelas).
+2. Rodar `dml_s.sql` na pasta onde estão `uf2_limpo.csv` e `empresas.csv` (carrega os dados).
+3. Conferir: `SELECT COUNT(*) FROM uf2;` deve dar 109142.

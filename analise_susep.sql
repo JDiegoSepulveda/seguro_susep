@@ -22,7 +22,7 @@ ORDER BY ano, ramo_nome DESC;
 
 /*
 PERGUNTA 2:
-COMO A RAZÃO SINISTRO/PRÊMIO DE CADA RAMO EVOLUIU MÊS A MÊS,
+COMO A razao SINISTRO/PRÊMIO DE CADA RAMO EVOLUIU MÊS A MÊS,
 E EM QUAIS MESES FOI MAIS CRÍTICA?
 */
 
@@ -164,6 +164,8 @@ select
 /*
 PERGUNTA 5: 
 O PRÊMIO DE CADA RAMO ESTÁ CRESCENDO DE UM ANO PARA O OUTRO?
+(Comparação entre janeiro a julho em todos os anos,
+porque 2026 só tem esses 7 meses para análise)
 */
 
 with premio_anual_ramo as(
@@ -176,6 +178,7 @@ select
     sum(u.premio_dir) premio_direto_total,
     left(u.ano_mes,4) ano
 FROM uf2 u
+WHERE RIGHT(u.ano_mes,2) between '01' and '07'
 group by ramo_nome, ano
 ),
 comparacao_anual as(
@@ -214,8 +217,9 @@ SELECT
     u.uf estado,
     SUM(u.premio_dir) premio_dir_total,
     SUM(u.sin_dir) sin_total
-FROM
-    uf2 u
+FROM uf2 u
+WHERE u.ramo = '0531'
+	AND u.flag_anomalia_uf = 0
 GROUP BY estado , ramo_nome
 ),
 premio_total_auto as(
@@ -230,18 +234,20 @@ select
     fe.premio_dir_total,
     fe.sin_total,
     pta.premio_total_auto,
-    round((fe.sin_total/fe.premio_dir_total),2) razão,
+    round((fe.sin_total/fe.premio_dir_total)*100,2) razao,
     round((fe.premio_dir_total/pta.premio_total_auto)*100,2) peso_estado
 from faturamento_por_estado fe
 cross join premio_total_auto pta 
 where fe.ramo_nome = 'Auto'
-order by peso_estado desc;
+order by razao desc;
 
 
 /*
 PERGUNTA 7:
 O PIOR RESULTADO DE UM ESTADO É TENDÊNCIA OU EVENTO PONTUAL?
 */
+
+#Qual Estado (UF) comm pior razão e como ela evoluiu.
 with faturamento_por_estado as(
 SELECT 
     CASE u.ramo
@@ -252,8 +258,9 @@ SELECT
     u.uf estado,
     SUM(u.premio_dir) premio_dir_total,
     SUM(u.sin_dir) sin_total
-FROM
-    uf2 u
+FROM uf2 u
+WHERE u.ramo = '0531'
+	AND u.flag_anomalia_uf = 0
 GROUP BY estado , ramo_nome
 ), razao_por_estado as(
 select
@@ -268,7 +275,7 @@ where fe.ramo_nome = 'Auto'
 pior_razao as(
 	Select *
     from razao_por_estado
-    order by razao asc
+    order by razao desc
     limit 1
 )
 select
@@ -279,72 +286,49 @@ select
 	pr.estado
 from uf2 u
 cross join pior_razao pr
-where u.uf = pr.estado and u.ramo = '0531'
+where u.uf = pr.estado 
+	AND u.ramo = '0531'
+	AND u.flag_anomalia_uf = 0
 group by ano, pr.estado;
+
+# O mesmo Estado(UF) comparado com RS e SP
+SELECT
+    u.uf estado,
+    LEFT(u.ano_mes, 4) ano,
+    ROUND(SUM(u.premio_dir) / 1e6, 1) premio_mi,
+    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir) * 100, 2) razao
+FROM uf2 u
+WHERE u.ramo = '0531'
+  AND u.flag_anomalia_uf = 0
+  AND u.uf IN ('AP', 'RS', 'SP')
+GROUP BY u.uf, ano
+ORDER BY u.uf, ano;
 
 /*
 PERGUNTA 8:
-EM 2023, O RESULTADO EXTREMO DE SERGIPE ESTÁ CONCENTRADO EM POUCOS MESES OU
-DISTRIBUÍDO AO LONGO DO ANO?
+EM 2023, O RESULTADO EXTREMO DE SERGIPE ESTÁ CONCENTRADO EM POUCOS MESES
+OU DISTRIBUÍDO AO LONGO DO ANO?
+(Aqui NÃO se filtra flag_anomalia_uf, de propósito: o objetivo é ver a anomalia.)
 */
 
-WITH faturamento_por_estado AS (
-    SELECT 
-        CASE u.ramo
-            WHEN '0531' THEN 'Auto'
-            WHEN '0114' THEN 'Resid'
-            WHEN '1391' THEN 'Vida'
-        END AS ramo_nome,
-        u.uf estado,
-        SUM(u.premio_dir) premio_dir_total,
-        SUM(u.sin_dir) sin_total
-    FROM uf2 u
-    GROUP BY u.uf, ramo_nome
-),
-
-razao_por_estado AS (
-    SELECT
-        fe.ramo_nome,
-        fe.estado,
-        fe.premio_dir_total,
-        fe.sin_total,
-        ROUND(fe.sin_total / fe.premio_dir_total, 2) razao
-    FROM faturamento_por_estado fe
-    WHERE fe.ramo_nome = 'Auto'
-),
-
-pior_razao AS (
-    SELECT *
-    FROM razao_por_estado
-    ORDER BY razao ASC
-    LIMIT 1
-)
-
 SELECT
-    LEFT(u.ano_mes, 4) ano,
     RIGHT(u.ano_mes, 2) mes,
-    SUM(u.premio_dir) premio_dir_total,
-    SUM(u.sin_dir) sin_total,
-    ROUND((SUM(u.sin_dir) / SUM(u.premio_dir)) * 100,2) razao,
-    pr.estado
+    ROUND(SUM(u.premio_dir) / 1e6, 1) premio_mi,
+    ROUND(SUM(u.sin_dir) / 1e6, 1) sinistro_mi,
+    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir) * 100, 2) razao,
+    SUM(u.flag_anomalia_uf) linhas_sinalizadas
 FROM uf2 u
-CROSS JOIN pior_razao pr
-WHERE u.uf = pr.estado
+WHERE u.uf = 'SE'
   AND u.ramo = '0531'
-  AND LEFT(u.ano_mes, 4) = '2023'
-GROUP BY
-    ano,
-    mes,
-    pr.estado
-ORDER BY
-    ano,
-    mes;
+  AND u.ano_mes BETWEEN '202301' AND '202312'
+GROUP BY mes
+ORDER BY mes;
 
 -- BLOCO D: DÁ PARA CONFIAR NOS NÚMEROS?
 
 /*
 PERGUNTA 9: 
-OS NÚMEROS POR ESTADOS CONFIÁVEIS?
+OS NÚMEROS POR ESTADOS SÃO CONFIÁVEIS?
 
 NOTA:Esta pergunta foi construída com apoio de IA: 
 a estratégia de comparar o total nacional da empresa com o pior estado foi sugerida, 
@@ -357,7 +341,8 @@ SELECT empresa, ramo, LEFT(ano_mes, 4) ano,
 FROM uf2
 WHERE ABS(sin_dir) > 50000000
   AND ABS(sin_dir) > 20 * premio_dir
-GROUP BY empresa, ramo, LEFT(ano_mes, 4);
+GROUP BY empresa, ramo, LEFT(ano_mes, 4)
+order by soma_abs_bi desc;
 
 SELECT uf, premio_dir, sin_dir
 FROM uf2
