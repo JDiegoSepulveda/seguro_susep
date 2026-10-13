@@ -1,12 +1,3 @@
-<!--
-RASCUNHO. Antes de publicar:
-1. Preencha a seção "Sobre o uso de IA" (marcada com [PREENCHER]).
-2. Explique de onde vêm os arquivos CSV (marcado com [PREENCHER]).
-3. Resolva os comentários "CONFERIR" (não aparecem quando o README é aberto no GitHub).
-4. Reescreva os trechos "O que mostra" com suas palavras.
-5. Renomeie dll_s.sql para ddl_s.sql (o README já usa o nome certo).
--->
-
 # Seguro SUSEP
 
 Projeto de análise de dados reais de seguros no Brasil, feito em MariaDB/SQL, com a base pública do SES (Sistema de Estatísticas da SUSEP).
