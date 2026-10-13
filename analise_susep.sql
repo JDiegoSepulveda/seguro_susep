@@ -13,12 +13,13 @@ SELECT
         WHEN '0114' THEN 'Resid'
         WHEN '1391' THEN 'Vida'
     END AS ramo_nome,
-    SUM(u.premio_dir) premio_direto_total,
-    sum(u.sin_dir) sin_dir_total,
+    round(sum(u.premio_dir)/1e9, 2) premio_direto_bi,
+    round(sum(u.sin_dir)/1e9, 2) sin_direto_bi,
+    round(sum(u.sin_dir)/sum(u.premio_dir)*100,2) razao,
     LEFT(u.ano_mes,4) ano
 FROM uf2 u
 GROUP BY u.ramo, left(u.ano_mes,4)
-ORDER BY ano, ramo_nome DESC;
+ORDER BY ramo_nome, ano DESC;
 
 /*
 PERGUNTA 2:
@@ -30,14 +31,16 @@ SELECT
 	case u.ramo
     when '0531' then 'Auto'
     when '0114' then 'Resid'
-    when '1391' then 'vida'
+    when '1391' then 'Vida'
     end as ramo_nome,
     left(u.ano_mes,4) ano,
     RIGHT(u.ano_mes, 2) mes,
    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir)*100,2) razao_sinistro_premio
 FROM
     uf2 u
-GROUP BY ano, mes, ramo_nome;
+Where left(u.ano_mes,4) <> '2026'
+GROUP BY ano, ramo_nome
+order by ramo_nome, ano, mes;
 
 
 

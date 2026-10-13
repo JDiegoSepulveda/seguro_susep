@@ -251,17 +251,23 @@ Todas as empresas somadas:
 
 ## Sobre o uso de IA
 
-[PREENCHER, por etapa: quem definiu as perguntas, quem escreveu cada consulta, quem revisou, quem investigou a qualidade dos dados, quem escreveu o texto deste README. O que já sei:]
+Usei IA (ChatGPT e Claude) para pensar o que perguntar sobre os dados e
+para revisar o meu trabalho.
 
-- A consulta da razão no mesmo período (1B), o teste sem a Allianz na pergunta 7 e a pergunta 9 foram feitos com apoio de IA.
-- As outras consultas foram escritas por mim, com correções apontadas na revisão.
-- A investigação de qualidade dos dados (dicionário de colunas e anomalia da Allianz) foi feita com orientação de IA, e conferi os números contra o portal da SUSEP.
-- Usei ChatGPT e Claude.
-
+- Escrevi as consultas das perguntas 1A, 1B, 2, 3, 4, 5, 6, 7 e 8.
+- A investigação da qualidade dos dados (colunas e anomalia da Allianz)
+  teve orientação de IA. Conferi os números contra o portal da SUSEP.
+- Os números e as conclusões saem das minhas consultas. O texto do README
+  foi escrito com IA a partir dos meus resultados, revisão e orientação de escrita.
+- Optei pela estruturação do README pela IA a fim de polir a linguagem e tornar 
+  o texto mais fluído.
+  
 ## Como recriar o banco
 
-[PREENCHER: de onde vêm os arquivos originais da SUSEP e o que fiz para chegar em `uf2_limpo.csv`.]
+O banco está só no meu computador, então ainda não dá para recriá-lo
+a partir deste repositório.
 
-1. Rodar `ddl_s.sql` (cria o banco e as tabelas).
-2. Rodar `dml_s.sql` na pasta onde estão `uf2_limpo.csv` e `empresas.csv` (carrega os dados).
-3. Conferir: `SELECT COUNT(*) FROM uf2;` deve dar 109142.
+- Fonte dos dados: base pública do SES (SUSEP). Link == https://www2.susep.gov.br/redarq.asp?arq=BaseCompleta%2ezip
+- As consultas estão em `analise_susep.sql`.
+- A estrutura das tabelas está em ESTRUTURA_BANCO.md.
+- Não publiquei os arquivos de dados nem os scripts de carga.
