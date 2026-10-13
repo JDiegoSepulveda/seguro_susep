@@ -3,8 +3,11 @@ USE susep_seguros;
 -- BLOCO A: ONDE ESTÁ O DINHEIRO? 
 
 /* 
-PERGUNTA 1: QUANTO CADA RAMO ARRECADA (PRÊMIO DIRETO) E PAGA EM SINISTROS (SINISTRO
+PERGUNTA 1A: QUANTO CADA RAMO ARRECADA (PRÊMIO DIRETO) E PAGA EM SINISTROS (SINISTRO
 DIRETO), ANO A ANO?
+
+Esta consulta serve para ver o tamanho de cada ramo em cada ano.
+O ano de 2026 fica de fora por não estar completo os 12 meses. (ver consulta 1B)
 */
 
 SELECT 
@@ -13,13 +16,41 @@ SELECT
         WHEN '0114' THEN 'Resid'
         WHEN '1391' THEN 'Vida'
     END AS ramo_nome,
-    round(sum(u.premio_dir)/1e9, 2) premio_direto_bi,
-    round(sum(u.sin_dir)/1e9, 2) sin_direto_bi,
-    round(sum(u.sin_dir)/sum(u.premio_dir)*100,2) razao,
-    LEFT(u.ano_mes,4) ano
-FROM uf2 u
-GROUP BY u.ramo, left(u.ano_mes,4)
-ORDER BY ramo_nome, ano DESC;
+    ROUND(SUM(u.premio_dir) / 1E9, 2) premio_direto_bi,
+    ROUND(SUM(u.sin_dir) / 1E9, 2) sin_direto_bi,
+    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir) * 100,
+            2) razao,
+    LEFT(u.ano_mes, 4) ano
+FROM
+    uf2 u
+where left(u.ano_mes,4) between '2023' and '2025'
+GROUP BY u.ramo , ano
+ORDER BY ramo_nome , ano DESC;
+
+/*PERGUNTA 1B:
+A RAZÃO SINISTRO/PRÊMIO MUDOU DE UM ANO PARA OUTRO, NO MESMO PERÍODO?
+
+Compara só janeiro a julho em todos os anos, porque 2026 só tem esses meses.
+A razão é sum(sinistro)/sum(prêmio), e não a média das razões mensais,
+para que meses grandes pesem mais que meses pequenos.
+*/
+
+SELECT 
+    CASE u.ramo
+        WHEN '0531' THEN 'Auto'
+        WHEN '0114' THEN 'Resid'
+        WHEN '1391' THEN 'Vida'
+    END AS ramo_nome,
+    LEFT(u.ano_mes, 4) ano,
+    ROUND(SUM(u.premio_dir) / 1E9, 2) premio_bi_jan_jul,
+    ROUND(SUM(u.sin_dir) / 1E9, 2) sin_bi_jan_jul,
+    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir) * 100, 2) razao_jan_jul
+FROM
+    uf2 u
+WHERE
+    RIGHT(u.ano_mes, 2) BETWEEN '01' AND '07'
+GROUP BY u.ramo , ano
+ORDER BY ramo_nome , ano desc;
 
 /*
 PERGUNTA 2:
@@ -77,41 +108,38 @@ PERGUNTA 3:
 QUAIS SÃO AS 10 MAIORES EMPRESAS DE CADA RAMO?
 */
 
-with premio_por_empresa as(
-SELECT 
+with premio_por_empresa as (
+	SELECT 
     u.empresa,
     CASE u.ramo
         WHEN '0531' THEN 'Auto'
         WHEN '0114' THEN 'Resid'
-        WHEN '1391' THEN 'vida'
+        WHEN '1391' THEN 'Vida'
     END AS ramo_nome,
     SUM(u.premio_dir) premio_direto_total
-FROM uf2 u
-GROUP BY 
-	u.empresa, 
-    u.ramo
-),
-rank_empresas AS (
-	select 
-		empresa, 
-        ramo_nome,
-        premio_direto_total,
-	row_number() 
-		over(partition by ramo_nome order by premio_direto_total desc) posicao
-from premio_por_empresa
-)
-SELECT 
-    empresa, 
-    ramo_nome, 
-    premio_direto_total, 
-    posicao
 FROM
-    rank_empresas
-WHERE
-    posicao <= 10
-ORDER BY 
-	ramo_nome ,
-    posicao;
+    uf2 u
+GROUP BY u.empresa , u.ramo
+),
+rank_empresas as (
+	select 
+    empresa,
+    ramo_nome,
+    premio_direto_total,
+    sum(premio_direto_total) over(partition by ramo_nome) premio_total_ramo,
+    row_number() over (partition by ramo_nome order by premio_direto_total desc) posicao
+    from premio_por_empresa
+)
+select r.ramo_nome,
+r.posicao,
+r.empresa,
+e.nome nome_empresa,
+round(r.premio_direto_total/1e9,2) premio_bi,
+round(r.premio_direto_total/r.premio_total_ramo*100,1) porcentagem_ramo
+from rank_empresas r
+left join empresas e on r.empresa = e.empresa
+where r.posicao <=10
+order by r.ramo_nome, r.posicao;
     
 /* 
 PERGUNTA 4:
@@ -222,7 +250,8 @@ SELECT
     SUM(u.sin_dir) sin_total
 FROM uf2 u
 WHERE u.ramo = '0531'
-	AND u.flag_anomalia_uf = 0
+	AND u.empresa <> '05177'
+    and u.ano_mes between '202301' and '202512'
 GROUP BY estado , ramo_nome
 ),
 premio_total_auto as(
@@ -250,7 +279,8 @@ PERGUNTA 7:
 O PIOR RESULTADO DE UM ESTADO É TENDÊNCIA OU EVENTO PONTUAL?
 */
 
-#Qual Estado (UF) comm pior razão e como ela evoluiu.
+#Qual Estado (UF) comm pior razão Auto e como ela evoluiu.
+# A Allianz (05177) fica fora em todos os anos e 2026 fica fora por ter só jan~jul.
 with faturamento_por_estado as(
 SELECT 
     CASE u.ramo
@@ -262,8 +292,9 @@ SELECT
     SUM(u.premio_dir) premio_dir_total,
     SUM(u.sin_dir) sin_total
 FROM uf2 u
-WHERE u.ramo = '0531'
-	AND u.flag_anomalia_uf = 0
+WHERE u.ramo = '0531' 
+	and u.empresa <> '05177' 
+	and u.ano_mes between '202301' and '202512'
 GROUP BY estado , ramo_nome
 ), razao_por_estado as(
 select
@@ -271,9 +302,9 @@ select
     fe.estado, 
     fe.premio_dir_total,
     fe.sin_total,
-    round((fe.sin_total/fe.premio_dir_total),2) razao
+    (fe.sin_total/fe.premio_dir_total) razao
 from faturamento_por_estado fe
-where fe.ramo_nome = 'Auto'
+where fe.ramo_nome = 'Auto' 
 ),
 pior_razao as(
 	Select *
@@ -291,21 +322,26 @@ from uf2 u
 cross join pior_razao pr
 where u.uf = pr.estado 
 	AND u.ramo = '0531'
-	AND u.flag_anomalia_uf = 0
+    and u.empresa <> '05177'
+    and u.ano_mes between '202301' and '202512'
 group by ano, pr.estado;
 
 # O mesmo Estado(UF) comparado com RS e SP
-SELECT
+# Razão de todos os estados por ano, com o mesmo filtro (sem Allianz, 2023 a 2025)
+SELECT 
     u.uf estado,
     LEFT(u.ano_mes, 4) ano,
-    ROUND(SUM(u.premio_dir) / 1e6, 1) premio_mi,
-    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir) * 100, 2) razao
-FROM uf2 u
-WHERE u.ramo = '0531'
-  AND u.flag_anomalia_uf = 0
-  AND u.uf IN ('AP', 'RS', 'SP')
-GROUP BY u.uf, ano
-ORDER BY u.uf, ano;
+    ROUND(SUM(u.premio_dir) / 1E6, 1) premio_mi,
+    ROUND(SUM(u.sin_dir) / SUM(u.premio_dir) * 100,
+            2) razao
+FROM
+    uf2 u
+WHERE
+    u.ramo = '0531' AND u.empresa <> '05177'
+        AND u.ano_mes BETWEEN '202301' AND '202512'
+       and u.uf in ('AP', 'RS', 'SP', 'TO')
+GROUP BY u.uf , ano
+ORDER BY u.uf , ano;
 
 /*
 PERGUNTA 8:

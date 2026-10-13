@@ -10,7 +10,7 @@ Montei o banco a partir dos arquivos da SUSEP, conferi se os dados fazem sentido
 - **Residencial e Vida:** o prêmio cresce e a razão cai (Residencial de 21,3% para 18,5%; Vida de 6,8% para 5,5%, em janeiro a julho).
 - **Poucas empresas concentram o mercado:** de 5 a 8 empresas somam 80% do prêmio em cada ramo.
 - **Estados em Automóvel:** o Amapá piora a cada ano e passa de 100% em 2025, mas com prêmio pequeno, então trato como indício. O Rio Grande do Sul teve um pico em 2024 e caiu em 2025.
-- **Dados por estado da Allianz em 2023 não são confiáveis.** Sinalizei essas linhas e deixei fora das análises por estado de Automóvel.
+- **Dados por estado da Allianz em 2023 não são confiáveis.** Sinalizei essas linhas e deixei a empresa fora das análises por estado de Automóvel.
 
 ## Sobre os dados e o período
 
@@ -23,9 +23,9 @@ Montei o banco a partir dos arquivos da SUSEP, conferi se os dados fazem sentido
 
 ## Banco de dados
 
-Banco `susep_seguros`, com três tabelas: `uf2` (prêmios e sinistros), `ramos` e `empresas`.
+Banco `susep_seguros`, com três tabelas: `uf2` (prêmios e sinistros, uma linha por empresa, mês, ramo e UF), `ramos` e `empresas` (nome de cada empresa).
 
-Os detalhes das tabelas e como recriar o banco estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em `analise_susep.sql`.
+Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em `analise_susep.sql`.
 
 ## Como ler os resultados
 
@@ -86,23 +86,24 @@ Os 3 meses com a razão mais alta de cada ramo:
 
 ### Pergunta 3: quais são as maiores empresas de cada ramo?
 
-As três maiores por prêmio direto no período (jan/2023 a jul/2026):
+As três maiores por prêmio direto no período (janeiro de 2023 a julho de 2026). A consulta calcula o ranking pelo código da empresa e depois busca o nome na tabela `empresas` (`LEFT JOIN`).
 
-| Ramo | Código da empresa | Prêmio (R$ bi) | % do ramo |
+| Ramo | Empresa | Prêmio (R$ bi) | % do ramo |
 |---|---|---|---|
-| Auto | 05886 | 31,22 | 23,7% |
-| Auto | 06190 | 20,58 | 15,6% |
-| Auto | 05312 | 17,74 | 13,5% |
-| Resid | 05886 | 4,33 | 19,8% |
-| Resid | 05312 | 3,44 | 15,7% |
-| Resid | 03476 | 3,32 | 15,2% |
-| Vida | 06866 | 28,53 | 43,5% |
-| Vida | 04367 | 9,76 | 14,9% |
-| Vida | 05282 | 7,89 | 12,0% |
+| Auto | Porto Seguro Companhia de Seguros Gerais | 31,22 | 23,7% |
+| Auto | Tokio Marine Seguradora | 20,58 | 15,6% |
+| Auto | Bradesco Auto/RE Companhia de Seguros | 17,74 | 13,5% |
+| Resid | Porto Seguro Companhia de Seguros Gerais | 4,33 | 19,8% |
+| Resid | Bradesco Auto/RE Companhia de Seguros | 3,44 | 15,7% |
+| Resid | XS3 Seguros | 3,32 | 15,2% |
+| Vida | Bradesco Vida e Previdência | 28,53 | 43,5% |
+| Vida | Prudential do Brasil Seguros | 9,76 | 14,9% |
+| Vida | Prudential do Brasil Seguros de Vida | 7,89 | 12,0% |
 
-<!-- CONFERIR: a coluna "% do ramo", o prêmio em R$ bi e "05886 em 7º em Vida" não saem direto da consulta do arquivo. Troque os códigos pelos nomes (join com a tabela empresas). -->
-
-**O que mostra:** em Vida, a líder tem quase metade do ramo, e a segunda tem um terço do tamanho dela. A empresa 05886 lidera Automóvel e Residencial e aparece em 7º lugar em Vida.
+**O que mostra:**
+- A Porto Seguro lidera Automóvel e Residencial e aparece em 7º lugar em Vida (R$ 1,71 bi, 2,6% do ramo).
+- Em Vida, a líder tem quase metade do ramo. Em 2º e 3º aparecem duas empresas com nome de Prudential. Pelo nome parecem ser do mesmo grupo (não verifiquei), e somadas teriam 26,9% do ramo.
+- A Allianz é a 4ª maior de Automóvel, com R$ 14,54 bi (11,0% do ramo). Ela fica fora das análises por estado (perguntas 6 e 7).
 
 A consulta completa traz as 10 maiores de cada ramo.
 
@@ -114,11 +115,11 @@ A consulta completa traz as 10 maiores de cada ramo.
 | Automóvel | 56 | 7 |
 | Residencial | 61 | 8 |
 
-<!-- CONFERIR: a coluna "Empresas no ramo" não sai da consulta do arquivo. -->
+<!-- CONFERIR: a coluna "Empresas no ramo" não sai da consulta do arquivo. Escreva a consulta e confirme os números. -->
 
 **O que mostra:** nos três ramos, menos de 15% das empresas concentram 80% do prêmio. Vida é o mais concentrado.
 
-**Cuidado:** "empresa" aqui é cada entidade que envia dados à SUSEP. Não juntei empresas do mesmo grupo econômico, o que deixaria o mercado ainda mais concentrado.
+**Cuidado:** "empresa" aqui é cada entidade que envia dados à SUSEP. Não juntei empresas do mesmo grupo econômico. Um exemplo está na pergunta 3: em Vida, as duas Prudential aparecem separadas. Juntar os grupos deixaria o mercado ainda mais concentrado.
 
 ---
 
@@ -215,7 +216,7 @@ Todas as empresas somadas:
 - De janeiro a agosto de 2023 a empresa tem sinistros negativos em vários estados. De setembro a dezembro de 2023, e em 2024 a 2026, não.
 
 **O que fiz:** mantive as linhas e marquei com `flag_anomalia_uf = 1` o bloco inteiro da Allianz em Automóvel, de janeiro a agosto de 2023 (216 linhas), e não só as 20 mais extremas. Nas análises nacionais uso tudo, porque o total parece certo. Nas análises por estado de Automóvel, deixo a Allianz de fora.
-<!-- CONFERIR: 216 = 27 UFs x 8 meses. Confirme que foi assim que marcou, e onde a coluna flag_anomalia_uf é criada (dml_s.sql ou ddl_s.sql). -->
+<!-- CONFERIR: 216 = 27 UFs x 8 meses. Rode SELECT COUNT(*) FROM uf2 WHERE flag_anomalia_uf = 1; (deve dar 216) e confirme em qual script está o UPDATE que marca essas linhas. -->
 
 **O que não sei:** a causa. Pode ser erro de envio, reclassificação ou uma regra de alocação por estado que eu desconheço.
 
@@ -227,18 +228,22 @@ Todas as empresas somadas:
 
 - A razão sinistro/prêmio não é a sinistralidade oficial (explicado acima).
 - A tabela não tem sinistro retido. A coluna `prem_ret_liq` é cópia de prêmio retido, então descartei. `salvados` e `recuperacao` são zero em todo o período e também foram descartadas.
+<!-- CONFERIR: a tabela uf2 tem as colunas premio_ret e grupamento, que nenhuma análise usa. Se quiser, diga em uma linha o que são e por que ficaram de fora. -->
 - Não sei se `sin_dir` é sinistro pago, avisado ou ocorrido.
 - A base é agregada por empresa, ramo e estado. Não tem clientes nem apólices individuais.
 - O prêmio de Automóvel em 2024 no meu banco difere do portal em cerca de R$ 18 mil. Não investiguei a causa.
-- Nas análises por estado de Automóvel, a Allianz fica de fora, então os valores em reais por estado ficam menores que os reais.
+- Nas análises por estado de Automóvel, a Allianz fica de fora. Ela é a 4ª maior do ramo (11,0% do prêmio), então essas análises não cobrem essa parte do mercado, e os valores em reais por estado ficam menores que os reais.
+- Não juntei empresas do mesmo grupo econômico (veja a pergunta 3).
 
 ## SQL utilizado
 
 - `CASE WHEN`, `GROUP BY`, `SUM`, `ROUND`, `LEFT` e `RIGHT` (todas as perguntas)
 - CTEs com `WITH` (perguntas 2 a 7)
-- Funções de janela: `ROW_NUMBER` (2, 3, 4), `SUM() OVER` (4), `LAG` (5)
+- Funções de janela: `ROW_NUMBER` (2, 3, 4), `SUM() OVER` (3, 4), `LAG` (5)
+- `LEFT JOIN` (3)
 - `CROSS JOIN` (6 e 7)
 - `NULLIF`, `ABS` e `MAX` (9)
+
 
 ## Sobre o uso de IA
 
