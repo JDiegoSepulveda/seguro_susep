@@ -1,5 +1,9 @@
+# Dados e arquivos sensíveis
+.env
 *.csv
 *.zip
-.env
+*.pbix
+
+# Python
 .venv/
-_pycache_/
+__pycache__/
