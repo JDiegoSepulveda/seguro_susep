@@ -1,3 +1,14 @@
+## O que encontrei (Automóvel)
+
+- **Poucas empresas concentram o prêmio.** As 5 maiores seguradoras ficam com 72,3% do prêmio direto (jan/2023 a jul/2026). Porto Seguro lidera, com R$ 31,2 bi.
+- **O prêmio ficou estável.** Por ano completo, ficou entre R$ 35,6 bi e R$ 37,5 bi (2023 a 2025). De janeiro a julho, entre R$ 20,3 bi e R$ 21,8 bi (2023 a 2026).
+- **A razão sinistro/prêmio subiu.** De janeiro a julho, foi de 63,5% em 2023 para 74,3% em 2026. O gráfico mostra que subiu, não mostra o motivo.
+- **Estados com razão alta pesam pouco.** Sem a Allianz, AP, RS e TO têm as razões mais altas (de 78% a 82%), mas AP e TO pesam só 0,02% e 0,29% do prêmio. Trato como indício, não como conclusão.
+- **O RS foi um caso à parte.** A razão passou de 62,2% (2023) para 107,9% (2024) e voltou a 76,2% (2025). Parece evento pontual, e não tendência.
+- **Cuidei dos dados.** Em 2023, os dados da Allianz têm valores por estado fora do padrão. Mantive o ano, marquei essas linhas e tirei a empresa das análises por estado.
+
+A razão sinistro/prêmio aqui serve para comparar anos, estados e empresas entre si. Não é a sinistralidade oficial da SUSEP.
+  
 # Seguro SUSEP
 
 Projeto de análise de dados reais de seguros no Brasil, feito em MariaDB/SQL, com a base pública do SES (Sistema de Estatísticas da SUSEP).
