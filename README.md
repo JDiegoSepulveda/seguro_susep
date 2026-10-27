@@ -267,3 +267,58 @@ a partir deste repositório.
 - As consultas estão em `analise_susep.sql`.
 - A estrutura das tabelas está em ESTRUTURA_BANCO.md.
 - Não publiquei os arquivos de dados nem os scripts de carga.
+
+
+
+## Power BI
+
+Relatório com 3 páginas, feito a partir do `uf2_limpo.csv` e do `empresas.csv`. Em cada página, os botões trocam o ramo: Automóvel, Residencial e Vida. As perguntas 8 e 9 ficaram só no SQL.
+
+### Página 1: Onde está o dinheiro
+Prêmio direto por ano (2023 a 2025), razão sinistro/prêmio de janeiro a julho de cada ano, as 10 maiores empresas por prêmio e quanto as 5 maiores concentram do ramo. Recorte: janeiro de 2023 a julho de 2026, com a Allianz.
+
+![Onde está o dinheiro: Automóvel](power_bi/imagens/onde_dinheiro_automovel.png)
+
+<details>
+<summary>Ver Residencial e Vida</summary>
+
+![Onde está o dinheiro: Residencial](power_bi/imagens/onde_dinheiro_residencial.png)
+![Onde está o dinheiro: Vida](power_bi/imagens/onde_dinheiro_vida.png)
+
+</details>
+
+### Página 2: Evolução no tempo
+Razão sinistro/prêmio mês a mês e prêmio direto de janeiro a julho de cada ano, de 2023 a 2026.
+
+![Evolução no tempo: Automóvel](power_bi/imagens/evolucao_automovel.png)
+
+<details>
+<summary>Ver Residencial e Vida</summary>
+
+![Evolução no tempo: Residencial](power_bi/imagens/evolucao_residencial.png)
+![Evolução no tempo: Vida](power_bi/imagens/evolucao_vida.png)
+
+</details>
+
+### Página 3: Estados em automóvel
+Razão sinistro/prêmio por estado no Automóvel, de 2023 a 2025, sem a Allianz. AP, RS e TO têm as razões mais altas, mas AP e TO pesam muito pouco no prêmio (0,02% e 0,29%). Trato como indício, não como conclusão.
+
+![Estados em automóvel: razão sinistro/prêmio](power_bi/imagens/razao_sinistralidade_premio.png)
+
+### Medidas em DAX
+
+| Medida | O que responde |
+|---|---|
+| Prêmio Direto | Quanto as seguradoras arrecadaram no recorte |
+| Sinistro Direto | Quanto pagaram em sinistros no recorte |
+| Razão S/P | De cada real recebido, quanto volta em sinistro |
+| Peso UF | Quanto cada estado pesa no prêmio |
+| Participação % | Quanto cada empresa pesa no prêmio |
+| Prêmio Top 5 | Quanto as 5 maiores empresas arrecadaram |
+| Concentração Top 5 | Que parte do prêmio fica com as 5 maiores |
+| Prêmio Ano Anterior | Prêmio no mesmo período do ano anterior |
+| Variação % | Quanto o prêmio cresceu ou caiu sobre o ano anterior |
+
+Fórmulas, explicação de cada uma e a consulta equivalente em SQL: [power_bi/medidas_dax.md](power_bi/medidas_dax.md)
+
+Todas as fórmulas foram escritas por mim. Em alguns momentos pedi ajuda de IA para entender o que cada comando faz e quando usá-lo.
