@@ -183,21 +183,22 @@ Comparação de **janeiro a julho** em todos os anos, porque 2026 só tem esses 
 
 ### Pergunta 7: o pior resultado de um estado em Automóvel é tendência ou evento pontual?
 
-Razão sinistro/prêmio de Automóvel por ano, **sem a Allianz e sem 2026** (2026 só tem sete meses):
+Razão sinistro/prêmio de Automóvel período de 2023 a 2025, **sem a Allianz e sem 2026** (2026 até a criação dessa análise o BD susep de 2026 só tem sete meses):
 
 | Estado | 2023 | 2024 | 2025 | Prêmio por ano |
 |---|---|---|---|---|
-| AP (pior razão) | 63,88% | 78,74% | 100,07% | R$ 6,6 a 8,4 milhões |
+| AP (pior razão em 2025) | 63,88% | 78,74% | 100,07% | R$ 6,6 a 8,4 milhões |
 | TO | 59,40% | 77,23% | 97,36% | R$ 92 a 94 milhões |
 | RS | 60,29% | 107,89% | 76,20% | cerca de R$ 2,1 bilhões |
-| SP | 62,20% | 61,19% | 62,42% | cerca de R$ 14 bilhões |
+| SP | 62,20% | 61,19% | 62,42% | cerca de R$ 14 a 14,5 bilhões |
 
-Escolhi esses estados depois de olhar os dados: o AP é o pior estado, o RS é o estado das enchentes, o SP é o maior estado e o TO tem o mesmo desenho do AP com mais volume. Não usei uma regra automática de escolha.
+Escolhi esses estados depois de olhar os dados: o Estado do AMAPÁ (AP) apresentou a maior razão em 2025, o RIO GRANDE DO SUL (RS) foi incluído pelo contexto dos eventos climáticos (enchentes), SÃO PAULO (SP) é o maior mercado de seguro do país e o TOCANTINS (TO) apresenta uma evolução semelhante à do AP - pertecendo a mesma região, com maior volume de prêmios. A seleção foi proposital, não automática.
+
 
 **O que mostra:**
-- **RS:** sobe em 2024 e cai em 2025. O desenho é de **evento pontual**. A SUSEP publicou em julho de 2024 que a sinistralidade dos seguros de danos no país saltou de 42,1% em abril para 66,1% em maio, por causa da tragédia no sul ([nota da SUSEP](https://www.gov.br/susep/pt-br/central-de-conteudos/noticias/2024/julho/reflexo-da-tragedia-no-sul-sinistralidade-nos-seguros-de-danos-salta-em-maio-para-66-1)). Os dados do projeto mostram o pico, e a explicação vem dessa fonte externa.
-- **AP e TO:** sobem nos três anos e passam de 97% em 2025, o desenho de **tendência**. Mas a maioria dos estados também subiu de 2023 para 2024. O que destaca o AP e o TO é 2025, quando mais da metade dos estados ficou entre 72% e 79%.
-- **SP:** quase estável.
+- **RS:**a razão (sinistro direto/premio direto) sobe de 60,29% para 107,89% em 2024 e cai para 76,20% em 2025. O comportamento sugere um evento pontual, devido a causa fortuita e/ou força maior, incidente de eventos climáticos.(https://www.gov.br/susep/pt-br/central-de-conteudos/noticias/2024/julho/reflexo-da-tragedia-no-sul-sinistralidade-nos-seguros-de-danos-salta-em-maio-para-66-1)
+- **AP e TO:** Estes dois estados acenderam um sinal de alerta ao apresentarem uma alta contínua que descolou do restante do país. Entre 2023 e 2024, o aumento da sinistralidade foi um movimento comum no Brasil. No entanto, em 2025, enquanto mais da metade dos estados brasileiros conseguiu controlar e estabilizar seus índices entre 72% e 79%, o Tocantins saltou para 97,36% e o Amapá atingiu 100,07%, evidenciando uma perda real de margem financeira nessas duas praças.
+- **SP:** relativamente estável nos três anos na casa de 61% a 62%. Como São Paulo possui uma base imensa de clientes (arrecadando mais de 14 bilhões por ano), o Estado se benefícia da lei das grandes proporções - as variações diárias e os custos locais de oficinas são absorvidos e diluídos naturalmente pelo tamanho do próprio marcado.
 
 **Cuidado:** são três anos de dados. O prêmio do AP é pequeno, então poucos sinistros grandes mudam o número, e trato o AP como indício. Refiz a análise sem a Allianz em todos os anos, porque a marcação de anomalia só tirava essa empresa em parte de 2023, e o desenho se manteve.
 
