@@ -4,7 +4,7 @@
 - **O prêmio ficou estável.** Por ano completo, ficou entre R$ 35,6 bi e R$ 37,5 bi (2023 a 2025). De janeiro a julho, entre R$ 20,3 bi e R$ 21,8 bi (2023 a 2026).
 - **A razão sinistro/prêmio subiu.** De janeiro a julho, foi de 63,5% em 2023 para 74,3% em 2026. O gráfico mostra que subiu, não mostra o motivo.
 - **Estados com razão alta pesam pouco.** Sem a Allianz, AP, RS e TO têm as razões mais altas (de 78% a 82%), mas AP e TO pesam só 0,02% e 0,29% do prêmio. Trato como indício, não como conclusão.
-- **O RS foi um caso à parte.** A razão passou de 62,2% (2023) para 107,9% (2024) e voltou a 76,2% (2025). Parece evento pontual, e não tendência.
+- **O RS foi um caso à parte.** A razão passou de 60,29% (2023) para 107,89% (2024) e posteriormente a 76,2% (2025). Parece evento pontual, e não tendência.
 - **Cuidei dos dados.** Em 2023, os dados da Allianz têm valores por estado fora do padrão. Mantive o ano, marquei essas linhas e tirei a empresa das análises por estado.
 
 A razão sinistro/prêmio aqui serve para comparar anos, estados e empresas entre si. Não é a sinistralidade oficial da SUSEP.
@@ -41,10 +41,10 @@ Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As c
 ## Como ler os resultados
 
 - **Prêmio direto:** o que as seguradoras arrecadam dos clientes.
-- **Sinistro direto:** o valor da coluna `sin_dir`. A documentação da SUSEP diz só "Sinistros Diretos", então não sei se é sinistro pago, avisado ou ocorrido.
+- **Sinistro direto:** o valor da coluna `sin_dir`. A documentação da SUSEP diz só "Sinistros Diretos", e não há informação se é sinistro pago, avisado ou ocorrido.
 - **Razão sinistro/prêmio:** sinistro ÷ prêmio × 100. Se a razão é 70, para cada R$ 100 de prêmio apareceram R$ 70 de sinistro.
 
-Essa razão é uma aproximação. **Não é a sinistralidade oficial da SUSEP**, que usa outros conceitos (para Automóvel em 2024, o portal mostra 61% e a minha razão dá 71%). Por isso uso a razão para comparar períodos dentro do mesmo ramo, e não para dizer qual é a sinistralidade do mercado.
+Essa razão é uma aproximação. **Não é a sinistralidade oficial da SUSEP**, que pode usar outros conceitos (para Automóvel em 2024, o portal mostra 61% e a minha razão dá 71%). Por isso uso a razão para comparar períodos dentro do mesmo ramo, e não para dizer qual é a sinistralidade do mercado.
 
 ---
 
