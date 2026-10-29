@@ -1,11 +1,10 @@
 ## O que encontrei (Automóvel)
 
 - **Poucas empresas concentram o prêmio.** As 5 maiores seguradoras ficam com 72,3% do prêmio direto (jan/2023 a jul/2026). Porto Seguro lidera, com R$ 31,2 bi.
-- **O prêmio ficou estável.** Por ano completo, ficou entre R$ 35,6 bi e R$ 37,5 bi (2023 a 2025). De janeiro a julho, entre R$ 20,3 bi e R$ 21,8 bi (2023 a 2026).
+- **O prêmio ficou estável em valores nominais, sem correção pela inflação.** Por ano completo, ficou entre R$ 35,6 bi e R$ 37,5 bi (2023 a 2025). De janeiro a julho, entre R$ 20,3 bi e R$ 21,8 bi (2023 a 2026).
 - **A razão sinistro/prêmio subiu.** De janeiro a julho, foi de 63,5% em 2023 para 74,3% em 2026. O gráfico mostra que subiu, não mostra o motivo.
-- **Estados com razão alta pesam pouco.** Sem a Allianz, AP, RS e TO têm as razões mais altas (de 78% a 82%), mas AP e TO pesam só 0,02% e 0,29% do prêmio. Trato como indício, não como conclusão.
-- **O RS foi um caso à parte.** A razão passou de 60,29% (2023) para 107,89% (2024) e posteriormente a 76,2% (2025). Parece evento pontual, e não tendência.
-- **Cuidei dos dados.** Em 2023, os dados da Allianz têm valores por estado fora do padrão. Mantive o ano, marquei essas linhas e tirei a empresa das análises por estado.
+- **Estados com razão alta:** dois pesam pouco, um não. De 2023 a 2025, sem a Allianz, AP, RS e TO têm as razões mais altas (de 78% a 82%). AP e TO pesam só 0,02% e 0,29% do prêmio, e trato como indício. O RS pesa 6,5%.
+- **O RS foi um caso à parte (sem Allianz).** A razão passou (sem a Allianz) de 60,29% (2023) para 107,89% (2024) e posteriormente a 76,2% (2025). Parece evento pontual, e não tendência.
 
 A razão sinistro/prêmio aqui serve para comparar anos, estados e empresas entre si. Não é a sinistralidade oficial da SUSEP.
   
@@ -44,7 +43,7 @@ Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As c
 - **Sinistro direto:** o valor da coluna `sin_dir`. A documentação da SUSEP diz só "Sinistros Diretos", e não há informação se é sinistro pago, avisado ou ocorrido.
 - **Razão sinistro/prêmio:** sinistro ÷ prêmio × 100. Se a razão é 70, para cada R$ 100 de prêmio apareceram R$ 70 de sinistro.
 
-Essa razão é uma aproximação. **Não é a sinistralidade oficial da SUSEP**, que pode usar outros conceitos (para Automóvel em 2024, o portal mostra 61% e a minha razão dá 71%). Por isso uso a razão para comparar períodos dentro do mesmo ramo, e não para dizer qual é a sinistralidade do mercado.
+Essa razão é uma aproximação. Não é a sinistralidade oficial da SUSEP, que pode usar outros conceitos. Para Automóvel em 2024, o painel PIMS da SUSEP (tela “Prêmios e Sinistros por Ano”, consultado em 28/10/2026) mostra sinistralidade de 60,82%, e a minha razão dá 70,99%. O prêmio é igual nos dois (R$ 35,63 bi), mas o sinistro é diferente: R$ 21,85 bi no painel e R$ 25,30 bi no sin_dir. Não sei explicar essa diferença. Por isso uso a razão para comparar períodos dentro do mesmo ramo, e não para dizer qual é a sinistralidade do mercado.
 
 ---
 
