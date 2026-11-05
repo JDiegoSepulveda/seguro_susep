@@ -28,7 +28,7 @@ IA: usei apoio de IA em partes do projeto. O detalhe, por pergunta, está em Sob
 
 Banco `susep_seguros`, com três tabelas: `uf2` (prêmios e sinistros, uma linha por empresa, mês, ramo e UF), `ramos` e `empresas` (nome de cada empresa).
 
-Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em `[analise_susep.sql](analise_susep.sql)`.
+Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em [analise_susep.sql](analise_susep.sql).
 
 ## Como ler os resultados
 
