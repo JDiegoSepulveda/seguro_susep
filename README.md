@@ -1,31 +1,24 @@
-## O que encontrei (Automóvel)
+# Seguro SUSEP: onde está o dinheiro e o risco no seguro brasileiro
 
-- **Poucas empresas concentram o prêmio.** As 5 maiores seguradoras ficam com 72,3% do prêmio direto (jan/2023 a jul/2026). Porto Seguro lidera, com R$ 31,2 bi.
-- **O prêmio ficou estável em valores nominais, sem correção pela inflação.** Por ano completo, ficou entre R$ 35,6 bi e R$ 37,5 bi (2023 a 2025). De janeiro a julho, entre R$ 20,3 bi e R$ 21,8 bi (2023 a 2026).
-- **A razão sinistro/prêmio subiu.** De janeiro a julho, foi de 63,5% em 2023 para 74,3% em 2026. O gráfico mostra que subiu, não mostra o motivo.
-- **Estados com razão alta:** dois pesam pouco, um não. De 2023 a 2025, sem a Allianz, AP, RS e TO têm as razões mais altas (de 78% a 82%). AP e TO pesam só 0,02% e 0,29% do prêmio, e trato como indício. O RS pesa 6,5%.
-- **O RS foi um caso à parte (sem Allianz).** A razão passou (sem a Allianz) de 60,29% (2023) para 107,89% (2024) e posteriormente a 76,2% (2025). Parece evento pontual, e não tendência.
+**Análise de 109 mil registros reais da SUSEP** (Auto, Vida e Residencial, de 2023 a jul/2026), com MariaDB/SQL e Power BI. Respondi 9 perguntas que um gestor do setor poderia fazer.
 
-A razão sinistro/prêmio aqui serve para comparar anos, estados e empresas entre si. Não é a sinistralidade oficial da SUSEP.
-  
-# Seguro SUSEP
+**Confiabilidade:** conferi o prêmio direto de Auto em 2024 com o portal da SUSEP: R$ 35.633.163.776 no meu banco contra R$ 35.633.145.412 no portal (diferença de cerca de R$ 18 mil).
 
-Projeto de análise de dados reais de seguros no Brasil, feito em MariaDB/SQL, com a base pública do SES (Sistema de Estatísticas da SUSEP).
+IA: usei apoio de IA em partes do projeto. O detalhe, por pergunta, está em Sobre o uso de IA.
 
-Montei o banco a partir dos arquivos da SUSEP, conferi se os dados fazem sentido e respondi perguntas que um gestor do setor poderia ter sobre três ramos: **Automóvel – Casco**, **Vida** e **Compreensivo Residencial**.
+![Onde está o dinheiro: Automóvel](power_bi/imagens/onde_dinheiro_automovel.png)
 
 ## O que descobri
 
-- **Automóvel** é o maior ramo em prêmio. No mesmo período (janeiro a julho), a razão sinistro/prêmio foi de 63,5% em 2023 para 74,3% em 2026, com queda em 2025. Parte do salto de 2024 vem do Rio Grande do Sul (enchentes).
-- **Residencial e Vida:** o prêmio cresce e a razão cai (Residencial de 21,3% para 18,5%; Vida de 6,8% para 5,5%, em janeiro a julho).
-- **Poucas empresas concentram o mercado:** de 5 a 8 empresas somam 80% do prêmio em cada ramo.
-- **Estados em Automóvel:** o Amapá piora a cada ano e passa de 100% em 2025, mas com prêmio pequeno, então trato como indício. O Rio Grande do Sul teve um pico em 2024 e caiu em 2025.
-- **Dados por estado da Allianz em 2023 não são confiáveis.** Sinalizei essas linhas e deixei a empresa fora das análises por estado de Automóvel.
+**Poucas empresas concentram o prêmio.** Em Auto, as 5 maiores ficam com 72,3% (jan/2023 a jul/2026). Nos três ramos, de 5 a 8 empresas somam 80%.
+**Auto:** a razão sinistro/prêmio subiu de 63,5% (2023) para 74,3% (2026), de janeiro a julho, com queda em 2025. O pico de 2024 coincide com o RS (enchentes); os dados não provam a causa.
+**Residencial e Vida:** o prêmio cresce e a razão cai (Residencial de 21,3% para 18,5%; Vida de 6,8% para 5,5%, jan a jul).
+**Estados em Auto:** o Amapá passa de 100% em 2025, mas pesa 0,02% do prêmio, então trato como indício. O RS teve pico em 2024 e caiu em 2025.
+**Qualidade dos dados:** as linhas da Allianz por estado em 2023 (jan a ago) são incompatíveis com o tamanho dos estados. Marquei e deixei a empresa fora das análises por estado de Auto.
 
 ## Sobre os dados e o período
 
 - Fonte: base do SES, tabela de prêmios e sinistros por empresa, ramo, mês e estado (UF), só com os três ramos acima.
-<!-- CONFERIR: se a base tem outros ramos e você filtrou, diga "filtrei três ramos". -->
 - Período: janeiro de 2023 a julho de 2026. **2026 tem só sete meses**, então quando comparo anos uso o mesmo período (janeiro a julho) ou deixo 2026 de fora.
 - 109.142 registros, 27 UFs (26 estados e o Distrito Federal), 769 empresas no cadastro.
 - Os valores estão em reais correntes, **sem correção pela inflação**.
@@ -35,7 +28,7 @@ Montei o banco a partir dos arquivos da SUSEP, conferi se os dados fazem sentido
 
 Banco `susep_seguros`, com três tabelas: `uf2` (prêmios e sinistros, uma linha por empresa, mês, ramo e UF), `ramos` e `empresas` (nome de cada empresa).
 
-Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em `analise_susep.sql`.
+Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As consultas estão em `[analise_susep.sql](analise_susep.sql)`.
 
 ## Como ler os resultados
 
@@ -43,7 +36,7 @@ Os detalhes das tabelas estão em [ESTRUTURA_BANCO.md](ESTRUTURA_BANCO.md). As c
 - **Sinistro direto:** o valor da coluna `sin_dir`. A documentação da SUSEP diz só "Sinistros Diretos", e não há informação se é sinistro pago, avisado ou ocorrido.
 - **Razão sinistro/prêmio:** sinistro ÷ prêmio × 100. Se a razão é 70, para cada R$ 100 de prêmio apareceram R$ 70 de sinistro.
 
-Essa razão é uma aproximação. Não é a sinistralidade oficial da SUSEP, que pode usar outros conceitos. Para Automóvel em 2024, o painel PIMS da SUSEP (tela “Prêmios e Sinistros por Ano”, consultado em 28/10/2026) mostra sinistralidade de 60,82%, e a minha razão dá 70,99%. O prêmio é igual nos dois (R$ 35,63 bi), mas o sinistro é diferente: R$ 21,85 bi no painel e R$ 25,30 bi no sin_dir. Não sei explicar essa diferença. Por isso uso a razão para comparar períodos dentro do mesmo ramo, e não para dizer qual é a sinistralidade do mercado.
+Essa razão é uma aproximação, e não a sinistralidade oficial da SUSEP. Serve para comparar anos, estados e empresas entre si. Em Auto/2024, o painel da SUSEP mostra 60,82% e a minha razão dá 70,99%. Não sei explicar a diferença (detalhes em Limitações).
 
 ---
 
@@ -246,7 +239,6 @@ Todas as empresas somadas:
 
 - A razão sinistro/prêmio não é a sinistralidade oficial (explicado acima).
 - A tabela não tem sinistro retido. A coluna `prem_ret_liq` é cópia de prêmio retido, então descartei. `salvados` e `recuperacao` são zero em todo o período e também foram descartadas.
-<!-- CONFERIR: a tabela uf2 tem as colunas premio_ret e grupamento, que nenhuma análise usa. Se quiser, diga em uma linha o que são e por que ficaram de fora. -->
 - Não sei se `sin_dir` é sinistro pago, avisado ou ocorrido.
 - A base é agregada por empresa, ramo e estado. Não tem clientes nem apólices individuais.
 - O prêmio de Automóvel em 2024 no meu banco difere do portal em cerca de R$ 18 mil. Não investiguei a causa.
@@ -261,20 +253,6 @@ Todas as empresas somadas:
 - `LEFT JOIN` (3)
 - `CROSS JOIN` (6 e 7)
 - `NULLIF`, `ABS` e `MAX` (9)
-
-
-## Sobre o uso de IA
-
-Usei IA (ChatGPT e Claude) para pensar o que perguntar sobre os dados e
-para revisar o meu trabalho.
-
-- Escrevi as consultas das perguntas 1A, 1B, 2, 3, 4, 5, 6, 7 e 8.
-- A investigação da qualidade dos dados (colunas e anomalia da Allianz)
-  teve orientação de IA. Conferi os números contra o portal da SUSEP.
-- Os números e as conclusões saem das minhas consultas. O texto do README
-  foi escrito com IA a partir dos meus resultados, revisão e orientação de escrita.
-- Optei pela estruturação do README pela IA a fim de polir a linguagem e tornar 
-  o texto mais fluído.
   
 ## Como recriar o banco
 
@@ -340,3 +318,16 @@ Razão sinistro/prêmio por estado no Automóvel, de 2023 a 2025, sem a Allianz.
 Fórmulas, explicação de cada uma e a consulta equivalente em SQL: [power_bi/medidas_dax.md](power_bi/medidas_dax.md)
 
 Todas as fórmulas foram escritas por mim. Em alguns momentos pedi ajuda de IA para entender o que cada comando faz e quando usá-lo.
+
+## Sobre o uso de IA
+
+Usei IA (ChatGPT e Claude) para pensar o que perguntar sobre os dados e
+para revisar o meu trabalho.
+
+- Escrevi as consultas das perguntas 1A, 1B, 2, 3, 4, 5, 6, 7 e 8.
+- A investigação da qualidade dos dados (colunas e anomalia da Allianz)
+  teve orientação de IA. Conferi os números contra o portal da SUSEP.
+- Os números e as conclusões saem das minhas consultas. O texto do README
+  foi escrito com IA a partir dos meus resultados, revisão e orientação de escrita.
+- Optei pela estruturação do README pela IA a fim de polir a linguagem e tornar 
+  o texto mais fluído.
