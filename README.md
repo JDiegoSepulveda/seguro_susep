@@ -14,8 +14,9 @@ IA: usei apoio de IA em partes do projeto. O detalhe, por pergunta, está em Sob
 
 **Auto:** a razão sinistro/prêmio subiu de 63,5% (2023) para 74,3% (2026), de janeiro a julho, com queda em 2025. O pico de 2024 coincide com o RS (enchentes); os dados não provam a causa.
 
-**Residencial e Vida:** o prêmio cresce e a razão cai (Residencial de 21,3% para 18,5%; Vida de 6,8% para 5,5%, jan a jul).
 **Estados em Auto:** o Amapá passa de 100% em 2025, mas pesa 0,02% do prêmio, então trato como indício. O RS teve pico em 2024 e caiu em 2025.
+
+**Residencial e Vida:** o prêmio cresce e a razão cai (Residencial de 21,3% para 18,5%; Vida de 6,8% para 5,5%, jan a jul).
 
 **Qualidade dos dados:** as linhas da Allianz por estado em 2023 (jan a ago) são incompatíveis com o tamanho dos estados. Marquei e deixei a empresa fora das análises por estado de Auto.
 
