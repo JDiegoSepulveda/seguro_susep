@@ -175,6 +175,15 @@ Comparação de **janeiro a julho** em todos os anos, porque 2026 só tem esses 
 - SP, MG, PR, RJ e RS somam cerca de 73% do prêmio.
 - A razão fica entre 55% e 82% nos 27 estados.
 
+**Interpretação financeira dos resultados:**
+- Embora o Amappa apresente a maior razão de sinistralidade (82,43%), sua participação representa apenas 0.02% do prêmio direto nacional. Portanto, seu resultado é proporcionalmente elevado, mas possui baixa representatividade financeira.
+
+O Rio Grande do Sul, por sua vez, apresenta razão semelhante, mas representa 6,51% do prêmio direto nacional. Essa combinação torna o estado financeiramente mais relevante para acompanhamento.
+
+São Paulo apresenta outra característica :concentra 43,99% do prêmio direto nacional, mas possui sinastralidade de 61,94% inferior à dos Estados com maiores razões.
+
+**Conclusão:** a análise conjunta da sinistralidade e do preso do prêmio permite distiguir Estados com resultados proporcionalmente ruins daqueles que representam maior exposição financeira.
+
 **Cuidado:** a razão do RS inclui maio e junho de 2024 (veja a pergunta 7). Também não sei como a SUSEP atribui cada valor a um estado, então não dá para dizer que os motoristas de um estado "custam mais".
 
 ### Pergunta 7: o pior resultado de um estado em Automóvel é tendência ou evento pontual?
@@ -201,6 +210,21 @@ Escolhi esses estados depois de olhar os dados: o AP apresentou a maior razão e
 - **TO:** a razão também sobe por três anos consecutivos, de 59,40% para 77,23% e 97,36%. O desenho é de tendência de alta. Como o prêmio anual é muito maior que o do AP, um único sinistro representa, em geral, uma parcela menor do prêmio. A alta merece atenção, mas ainda é necessário verificar a distribuição mensal e por seguradora.
 
 - **SP:** a razão permanece relativamente estável nos três anos, entre 61,19% e 62,42%.
+
+**Comportamento identificado:**
+
+- **Amapá:** Deterioraão anual, com elevada volatilidade mensal.
+
+- **Tocantins:** Deterioração mais disseminada ao longo de 2025.
+
+- **Rio Grande do Sul:** Pico concentrado em 2024, seguindo recuo.
+
+- **São Paulo:** Estabilidade nos três anos.
+
+**Conclusão:** 
+- A análise indica comportamentos distintos. O Amapá apresenta a maior razão anual em 2025, mas também maior volatividade mensal. O Tocantins demonstra uma deterioração mais disseminada ao longo de 2025 possui um volume de prêmio significativamente maior, tornando o resultado financeiramente mais relevante. Já o Rio Grande do Sul apresenta uma elavaçao concentrada em 2024, seguida de recuo, enquanto São Paulo mantèm estabilidade.
+
+- Esses resultados apontam sinais de atenção, mas não permitem afirmar, por si so, as causas de deterioração ou sua continuidade nos períodos seguintes.
 
 **Critério de exclusão da Allianz:** retirei a empresa de todos os anos porque a marcação de anomalia utilizada no projeto cobria apenas parte de 2023. Manter a exclusão somente nesse período criaria uma comparação inconsistente. O tratamento está explicado na Q9.
 
