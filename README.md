@@ -87,7 +87,9 @@ Os 3 meses com a razão mais alta de cada ramo:
 | Resid | 11/2023 (33,98%) | 10/2023 (33,46%) | 01/2024 (31,87%) |
 | Vida | 03/2023 (8,29%) | 05/2023 (7,71%) | 07/2024 (7,46%) |
 
-**O que mostra:** Automóvel apresenta uma concentração atípica em maio de 2024, quando atingiu 96,16%, valor significativamente superior aos meses próximos (entre 66% e 72%, valores arrendondados) O resultado indica uma deterioração pontual do indicador, que coincide temporalmente com as enchentes no Rio Grande do Sul. Essa coincidência merece investigação, mas, isoladamente, não comprova relação causal. Residencial e Vida apresenta orcilações menores, sem picos de magnitude semelhante.
+*Deixei 2026 de fora para usar o  mesmo periodo das perguntas 6 e 7 (janeiro de 2023 a dezembro de 2025). Com isso, esta análise não mostra os meses mais recentes, os de 2026.*
+
+**O que mostra:** Automóvel apresentam uma concentração atípica em maio de 2024, quando atingiu 96,16%, valor significativamente superior aos meses próximos (entre 66% e 72%, valores arredondados) O resultado indica uma deterioração pontual do indicador, que coincide temporalmente com as enchentes no Rio Grande do Sul. Essa coincidência merece investigação, mas, isoladamente, não comprova relação causal. Residencial e Vida apresenta oscilações menores, sem picos de magnitude semelhante.
 
 **Cuidado:** a razão de um mês isolado oscila mais que a anual, e poucos anos de dados não bastam para falar em "época do ano" com segurança.
 
