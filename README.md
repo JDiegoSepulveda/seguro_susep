@@ -124,8 +124,6 @@ A consulta completa traz as 10 maiores de cada ramo.
 | Automóvel | 56 | 7 |
 | Residencial | 61 | 8 |
 
-<!-- CONFERIR: a coluna "Empresas no ramo" não sai da consulta do arquivo. Escreva a consulta e confirme os números. -->
-
 **O que mostra:** nos três ramos, menos de 15% das empresas concentram 80% do prêmio. Vida é o mais concentrado.
 
 **Cuidado:** "empresa" aqui é cada entidade que envia dados à SUSEP. Não juntei empresas do mesmo grupo econômico. Um exemplo está na pergunta 3: em Vida, as duas Prudential aparecem separadas. Juntar os grupos deixaria o mercado ainda mais concentrado.
@@ -257,7 +255,6 @@ Todas as empresas somadas:
 - De janeiro a agosto de 2023 a empresa tem sinistros negativos em vários estados. De setembro a dezembro de 2023, e em 2024 a 2026, não.
 
 **O que fiz:** mantive as linhas e marquei com `flag_anomalia_uf = 1` o bloco inteiro da Allianz em Automóvel, de janeiro a agosto de 2023 (216 linhas), e não só as 20 mais extremas. Nas análises nacionais uso tudo, porque o total parece certo. Nas análises por estado de Automóvel, deixo a Allianz de fora.
-<!-- CONFERIR: 216 = 27 UFs x 8 meses. Rode SELECT COUNT(*) FROM uf2 WHERE flag_anomalia_uf = 1; (deve dar 216) e confirme em qual script está o UPDATE que marca essas linhas. -->
 
 **O que não sei:** a causa. Pode ser erro de envio, reclassificação ou uma regra de alocação por estado que eu desconheço.
 
