@@ -77,7 +77,7 @@ Essa razão é uma aproximação, e não a sinistralidade oficial da SUSEP. Serv
 
 **Cuidado:** a razão de Vida é muito baixa e não sei dizer o que o sinistro direto captura nesse ramo. Por isso comparo cada ramo com ele mesmo ao longo do tempo, e não os ramos entre si.
 
-### Pergunta 2: como a razão evoluiu mês a mês, e em quais meses foi mais crítica?
+### Pergunta 2: como a razão evoluiu mês a mês (sem 2026), e em quais meses foi mais crítica?
 
 Os 3 meses com a razão mais alta de cada ramo:
 
@@ -87,7 +87,7 @@ Os 3 meses com a razão mais alta de cada ramo:
 | Resid | 11/2023 (33,98%) | 10/2023 (33,46%) | 01/2024 (31,87%) |
 | Vida | 03/2023 (8,29%) | 05/2023 (7,71%) | 07/2024 (7,46%) |
 
-**O que mostra:** o pior mês de Automóvel, maio de 2024, destoa dos vizinhos (entre 66% e 72%). Esse mês coincide com as enchentes no Rio Grande do Sul (veja a pergunta 7). Os outros meses mais altos de Automóvel são janeiros.
+**O que mostra:** Automóvel apresenta uma concentração atípica em maio de 2024, quando atingiu 96,16%, valor significativamente superior aos meses próximos (entre 66% e 72%, valores arrendondados) O resultado indica uma deterioração pontual do indicador, que coincide temporalmente com as enchentes no Rio Grande do Sul. Essa coincidência merece investigação, mas, isoladamente, não comprova relação causal. Residencial e Vida apresenta orcilações menores, sem picos de magnitude semelhante.
 
 **Cuidado:** a razão de um mês isolado oscila mais que a anual, e poucos anos de dados não bastam para falar em "época do ano" com segurança.
 
